@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Paaji+2:wght@400..800&family=Comfortaa:wght@300..700&family=Kaushan+Script&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap');
+
+* {
+  /* font-family: "Comfortaa", sans-serif; */
+  /* font-family: "Montserrat", sans-serif; */
+  font-family: "Quicksand", sans-serif;
+  /* font-family: "Baloo Paaji 2", sans-serif;  */
+  font-optical-sizing: auto;
+}
+
+.customFont {
+  font-family: "Kaushan Script", cursive;
+}
+
+.hideScroller::-webkit-scrollbar {
+  display: none;
+}
+
+.hideScroller {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.outerCircle {
+  animation: outerSpin 2s linear infinite forwards;
+  will-change: transform
+}
+
+@keyframes outerSpin {
+  0% {
+    transform: rotate(0deg)
+  }
+
+  100% {
+    transform: rotate(360deg)
+  }
+}
+
+.innerCircle {
+  animation: innerSpin 2.5s linear infinite;
+  animation-delay: 0ms;
+  will-change: transform
+}
+
+@keyframes innerSpin {
+  0% {
+    transform: rotate(0deg)
+  }
+
+  100% {
+    transform: rotate(-360deg)
+  }
+}
+
+.dots {
+  animation: bounceDot 0.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.dot1 {
+  animation-delay: 0s;
+}
+
+.dot2 {
+  animation-delay: 0.2s;
+}
+
+.dot3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounceDot {
+  0% {
+    transform: translateY(0px)
+  }
+
+  50% {
+    transform: translateY(-5px)
+  }
+
+  100% {
+    transform: translateY(0)
+  }
+}
+
+.question {
+  animation: question 1s linear infinite;
+}
+
+.equal {
+  animation-delay: 0.5s;
+}
+
+@keyframes question {
+  0% {
+    top: -30px;
+    opacity: 100%;
+  }
+
+  100% {
+    top: 0;
+    opacity: 0;
+  }
+}
