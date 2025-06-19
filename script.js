@@ -103,6 +103,12 @@ create.addEventListener("click", () => {
   selectedValue.forEach(selected => {
     formData[ selected.dataset.name ] = selected.textContent
   })
+  formData[ "entryDate" ] = firebase.firestore.FieldValue.serverTimestamp()
+  let date = firebase.firestore.FieldValue.serverTimestamp()
+
+  db.collection("90d_challenge").doc(selectedDay.textContent).set({
+    latestEntry: date
+  })
 
   db.collection("90d_challenge").doc(selectedDay.textContent).collection("entries").add(formData)
     .then(() => { alert("Data added.") })
@@ -116,39 +122,74 @@ create.addEventListener("click", () => {
 // Getting Data
 const showAllHabitData = async () => {
   const progressDetails = document.querySelector(".progressDetails")
+  progressDetails.innerHTML = ""
   for (let day = 90; day >= 1; day--) {
-    const ref = db.collection(`90d_challenge/${day}/entries`)
-    const snapshot = await ref.get()
 
+    const dbRef = db.collection("90d_challenge").doc(String(day))
     let smTotal = 0
     let drTotal = 0
+    let latestEntry = null
 
-    snapshot.forEach(doc => {
-      const data = doc.data()
-
-      if (data.habit === "Sm") {
-        smTotal += parseInt(data.count || "0")
-      }
-
-      if (data.habit === "Dr" && (data.count || "").toLowerCase() === "no") {
-        drTotal += 1
+    // Getting Date of the latest entry
+    dbRef.onSnapshot(docRef => {
+      if (docRef.exists) {
+        latestEntry = docRef.data().latestEntry || null
       }
     })
 
-    // Only log if there's at least some data
-    if (smTotal > 0 || drTotal > 0) {
-      let dayNumber = document.createElement("div")
-      dayNumber.classList.add("w-full", "rounded-lg", "overflow-hidden", "border", "border-slate-400")
-      dayNumber.innerHTML = `
-        <div class="dayNumber bg-[#333] text-white p-2">Day: ${day}</div>
+    dbRef.collection("entries").onSnapshot(snapshot => {
+
+      smTotal = 0
+      drTotal = 0
+
+      snapshot.forEach(doc => {
+        let data = doc.data()
+        if (data.habit === "Sm") {
+          const count = parseInt(data.count)
+          if (!isNaN(count)) smTotal += count
+        }
+
+        if (data.habit === "Dr") {
+          if (data.count === "" || data.count == null) {
+            drTotal = "-"
+            return
+          }
+
+          const val = data.count.toLowerCase()
+          if (val === "no") {
+            drTotal = typeof drTotal === "number" ? drTotal + 1 : 1
+          } else if (val === "yes") {
+            drTotal = typeof drTotal === "number" ? drTotal - 1 : -1
+          }
+        }
+
+      })
+
+      const oldCard = document.querySelector(`[data-day="${day}"]`)
+      if (oldCard) oldCard.remove()
+
+
+      // Only log if there's at least some data
+      if (smTotal > 0 || drTotal > 0) {
+        let dayNumber = document.createElement("div")
+        dayNumber.dataset.day = day
+        dayNumber.classList.add("w-full", "rounded-lg", "overflow-hidden", "border", "border-slate-400")
+        dayNumber.innerHTML = `
+        <div class="dayNumber bg-[#333] text-white p-2 flex items-center justify-between uppercase text-xs">
+          <span>Day: ${day}</span>
+          <span>Dt: ${latestEntry?.toDate().toLocaleString() || "NA"}</span>
+        </div>
         <div class="font-lg p-3 flex items-center justify-between uppercase">
           <div class="smTotal">sm: ${smTotal}</div>
           <div class="drTotal">dr: ${drTotal}</div>
         </div>
       `
-      progressDetails.prepend(dayNumber)
-    }
+        progressDetails.prepend(dayNumber)
+      }
+    })
+
   }
+
 }
 
 showAllHabitData()
